@@ -3,55 +3,30 @@ package com.example.composeproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.composeproject.ui.theme.ComposeProjectTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
+
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
+import com.example.composeproject.ui.theme.ActionBarColor
+import com.example.composeproject.ui.theme.ComposeProjectTheme
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, true)
         setContent {
             ComposeProjectTheme {
@@ -60,16 +35,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Preview
+     @OptIn(ExperimentalMaterial3Api::class)
+     @Preview
     @Composable
     fun SimpleScaffold() {
-
         val navController = rememberNavController()
-        SetSystemUi()
-        Scaffold(
 
+        Scaffold(
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
                         Text(
                             text = "Simple Scaffold",
@@ -78,44 +52,38 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { /* TODO: Handle back or drawer */ }) {
+                        IconButton(onClick = { }) {
                             Icon(
                                 imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                contentDescription = "Menu"
                             )
                         }
                     },
                     actions = {
-                        IconButton(onClick = { /* TODO: Handle search */ }) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Default.Search, contentDescription = "Search")
                         }
-                        IconButton(onClick = { /* TODO: Handle more options */ }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "More")
                         }
                     },
-
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = ActionBarColor,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White
                     )
+                )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { /* Action here */ }) {
+                FloatingActionButton(onClick = { }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             },
             bottomBar = {
                 BottomBar(navController)
             }
-
         ) { padding ->
-            // Main content area
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -126,22 +94,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-     @Composable
+    @Composable
     fun BottomBar(navController: NavController) {
         val items = listOf(
             BottomNavItem.Home,
             BottomNavItem.Profile,
             BottomNavItem.Settings
         )
+        val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
-        BottomNavigation(
-            backgroundColor = Color.White,
-            contentColor = Color.Black
-        ) {
-            val currentDestination = navController.currentBackStackEntryAsState().value?.destination
-
+        NavigationBar {
             items.forEach { item ->
-                BottomNavigationItem(
+                NavigationBarItem(
                     icon = { Icon(item.icon, contentDescription = item.title) },
                     label = { Text(item.title) },
                     selected = currentDestination?.route == item.route,
@@ -173,11 +137,11 @@ class MainActivity : ComponentActivity() {
             composable("settings") { Text("Settings Screen") }
         }
     }
+
     @Composable
     fun SetSystemUi() {
         val systemUiController = rememberSystemUiController()
-        val useDarkIcons = !isSystemInDarkTheme() // ✅ correct way
-
+        val useDarkIcons = !isSystemInDarkTheme()
         SideEffect {
             systemUiController.setSystemBarsColor(
                 color = Color.Transparent,
@@ -185,8 +149,6 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
-
-
 }
 
 
