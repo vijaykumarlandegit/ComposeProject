@@ -40,7 +40,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun SimpleScaffold() {
         val navController = rememberNavController()
-
+          val sheetState = rememberModalBottomSheetState(
+             skipPartiallyExpanded = false, // disables half height
+             confirmValueChange = { true }
+         )
+         var showSheet by remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -76,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { }) {
+                FloatingActionButton(onClick = {showSheet = true  }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             },
@@ -92,6 +96,14 @@ class MainActivity : ComponentActivity() {
                 NavigationGraph(navController)
             }
         }
+         if (showSheet) {
+             ModalBottomSheet(
+                 onDismissRequest = { showSheet = false },
+                 sheetState = sheetState
+             ) {
+                 BottomSheetContent()
+             }
+         }
     }
 
     @Composable
