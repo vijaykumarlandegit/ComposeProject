@@ -49,7 +49,7 @@ fun BottomSheetContent() {
             text = "Add Study Details",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground, // ✅ ensures visible text
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -58,7 +58,7 @@ fun BottomSheetContent() {
             fontSize = 15.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onBackground, // ✅ ensures visible text
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.align(Alignment.CenterHorizontally)
 
         )
