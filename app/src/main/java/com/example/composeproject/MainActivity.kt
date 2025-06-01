@@ -12,18 +12,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.composeproject.presentation.compose.BottomSheetContent
+import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
 import com.example.composeproject.ui.theme.ActionBarColor
 import com.example.composeproject.ui.theme.ComposeProjectTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import dagger.hilt.android.AndroidEntryPoint
 
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,16 +39,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-     @OptIn(ExperimentalMaterial3Api::class)
-     @Preview
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SimpleScaffold() {
+        val addTopicViewmodel: AddTopicViewmodel = viewModel()
+        val context= LocalContext.current
         val navController = rememberNavController()
-          val sheetState = rememberModalBottomSheetState(
-             skipPartiallyExpanded = false, // disables half height
-             confirmValueChange = { true }
-         )
-         var showSheet by remember { mutableStateOf(false) }
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = false, // disables half height
+            confirmValueChange = { true }
+        )
+        var showSheet by remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -80,7 +85,7 @@ class MainActivity : ComponentActivity() {
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = {showSheet = true  }) {
+                FloatingActionButton(onClick = { showSheet = true }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             },
@@ -96,14 +101,14 @@ class MainActivity : ComponentActivity() {
                 NavigationGraph(navController)
             }
         }
-         if (showSheet) {
-             ModalBottomSheet(
-                 onDismissRequest = { showSheet = false },
-                 sheetState = sheetState
-             ) {
-                 BottomSheetContent()
-             }
-         }
+        if (showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false },
+                sheetState = sheetState
+            ) {
+                BottomSheetContent(addTopicViewmodel,context)
+            }
+        }
     }
 
     @Composable

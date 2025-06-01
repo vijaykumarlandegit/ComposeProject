@@ -1,12 +1,10 @@
-package com.example.composeproject
+package com.example.composeproject.presentation.compose
 
-import androidx.compose.foundation.background
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -18,25 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.composeproject.ui.theme.ActionBarColor
-import com.example.composeproject.ui.theme.ComposeProjectTheme
+import com.example.composeproject.data.model.AddTopicDataClass
+import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
 
-@Preview(showBackground = true)
-@Composable
-fun BottomSheetContentPreview() {
-    ComposeProjectTheme {
-        BottomSheetContent()
-    }
-}
 
 @Composable
-fun BottomSheetContent() {
+fun BottomSheetContent(addTopicViewmodel: AddTopicViewmodel, context: Context) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -64,7 +54,7 @@ fun BottomSheetContent() {
         )
 
         var topicName by remember { mutableStateOf("") }
-        var topicDesc by remember { mutableStateOf("") }
+        var topicDes by remember { mutableStateOf("") }
 
         Column(modifier = Modifier.padding(16.dp)) {
 
@@ -89,8 +79,8 @@ fun BottomSheetContent() {
 
             // Topic Description Field
             OutlinedTextField(
-                value = topicDesc,
-                onValueChange = { topicDesc = it },
+                value = topicDes,
+                onValueChange = { topicDes = it },
                 label = { Text("Topic Description") },
                 placeholder = { Text("Write something about the topic...") },
                 shape = RoundedCornerShape(12.dp),
@@ -108,7 +98,23 @@ fun BottomSheetContent() {
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { },
+                onClick = {
+                    if(topicName.isNotEmpty() && topicDes.isNotEmpty()) {
+                        val topic = AddTopicDataClass(topicName, topicDes)
+                        addTopicViewmodel.uploadTopic(topic) { isSuccess ->
+                            if (isSuccess) {
+                                topicName = ""
+                                topicDes = ""
+                                Toast.makeText(context, "Topic uploaded Successfully!!", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(context, "Something is wrong", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Fill all fields", Toast.LENGTH_LONG).show()
+                    }
+                }
+                ,
                 modifier = Modifier.fillMaxWidth()
             ) {
                  Text("Upload")
