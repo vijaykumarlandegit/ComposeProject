@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -20,6 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.composeproject.presentation.compose.BottomSheetContent
+import com.example.composeproject.presentation.compose.ShowAllDayTopics
 import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
 import com.example.composeproject.ui.theme.ActionBarColor
 import com.example.composeproject.ui.theme.ComposeProjectTheme
@@ -149,7 +151,15 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun NavigationGraph(navController: NavHostController) {
         NavHost(navController, startDestination = "home") {
-            composable("home") { Text("Home Screen") }
+            composable("home") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    ShowAllDayTopics(userId = "123")
+                }
+            }
             composable("profile") { Text("Profile Screen") }
             composable("settings") { Text("Settings Screen") }
         }
