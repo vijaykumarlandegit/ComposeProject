@@ -1,7 +1,11 @@
 package com.example.composeproject.presentation.compose
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -20,25 +24,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.composeproject.data.model.TopicClass
 import com.example.composeproject.presentation.viewmodel.FetchTopicsViewModel
 
 @Composable
-fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: String) {
+fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: String,navController:NavController) {
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {//id
         viewModel.getTopicsListFromFireStore(userId)
     }
-    val topicsList = viewModel.topicList
-    val totalTopics=topicsList.size
+    val groupedByDate = viewModel.groupedByDate
+   // val totalTopics=topicsList.size
     LazyColumn {
-        items(items = topicsList) { topic -> // ✅ correct
+        items(items = groupedByDate) { topic -> // ✅ correct
 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .clickable {
+                        navController.navigate("showTopics")
+                    },
                 shape = RoundedCornerShape(10.dp),
                 elevation = CardDefaults.cardElevation(10.dp)
 
@@ -46,19 +54,25 @@ fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: 
             ) {
                 Row(
                     modifier = Modifier
-                         .padding(8.dp),
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = topic.date,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(modifier = Modifier.width(20.dp))
-                     Text(
-                              text="$totalTopics",
-                             fontSize = 20.sp,
-                             fontWeight = FontWeight.Bold
-                      )
+                    Text(
+                        text = "Topics: ${topic.totalTopics}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "Minutes: ${topic.totalMinutes}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
 

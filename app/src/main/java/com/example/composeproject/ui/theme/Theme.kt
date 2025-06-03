@@ -12,26 +12,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = ActionBarColor,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
 private val LightColorScheme = lightColorScheme(
-    primary = ActionBarColor,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-//    background = Color(0xFFFFFBFE),
-//    surface = Color(0xFFFFFBFE),
-//    onPrimary = Color.White,
-//    onSecondary = Color.White,
-//    onTertiary = Color.White,
-//    onBackground = Color(0xFF1C1B1F),
-//    onSurface = Color(0xFF1C1B1F),
+    primary = Color(0xFF1976D2),       // Action bar, buttons, FABs
+    secondary = Color(0xFF64B5F6),     // Chips, tabs, secondary buttons
+    tertiary = Color(0xFF81C784),      // Progress bars, highlights, stats
 
+    background = Color(0xFFF5F9FF),    // Whole screen background
+    surface = Color(0xFFFFFFFF),       // Cards, surfaces
 
+    onPrimary = Color.White,           // Text/icon on primary
+    onSecondary = Color.White,         // Text/icon on secondary
+    onTertiary = Color.Black,          // Text/icon on tertiary
+
+    onBackground = Color(0xFF121212),  // General text
+    onSurface = Color(0xFF121212)      // Card text, content
 )
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF90CAF9),       // Action bar, buttons, FABs
+    secondary = Color(0xFF42A5F5),     // Chips, tabs, secondary buttons
+    tertiary = Color(0xFF66BB6A),      // Progress bars, highlights, stats
+
+    background = Color(0xFF121212),    // Whole screen background
+    surface = Color(0xFF1E1E1E),       // Cards, surfaces
+
+    onPrimary = Color.Black,           // Text/icon on primary
+    onSecondary = Color.Black,         // Text/icon on secondary
+    onTertiary = Color.White,          // Text/icon on tertiary
+
+    onBackground = Color(0xFFE0E0E0),  // General text
+    onSurface = Color(0xFFE0E0E0)      // Card text, content
+)
+
 
 @Composable
 fun ComposeProjectTheme(

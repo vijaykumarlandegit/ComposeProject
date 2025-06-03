@@ -22,10 +22,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.composeproject.presentation.compose.BottomSheetContent
 import com.example.composeproject.presentation.compose.ShowAllDayTopics
+import com.example.composeproject.presentation.screen.ShowAllTopicScreen
+import com.example.composeproject.presentation.screen.SplashScreen
 import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
-import com.example.composeproject.ui.theme.ActionBarColor
-import com.example.composeproject.ui.theme.ComposeProjectTheme
+ import com.example.composeproject.ui.theme.ComposeProjectTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -35,9 +37,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
         setContent {
+            var showSplash by remember { mutableStateOf(true) }
+
+
             ComposeProjectTheme {
-                SimpleScaffold()
-            }
+                if (showSplash) {
+                    SplashScreen {
+                        showSplash = false
+                    }
+                } else {
+                    SimpleScaffold()
+
+                }
+             }
         }
     }
 
@@ -45,54 +57,65 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun SimpleScaffold() {
         val addTopicViewmodel: AddTopicViewmodel = viewModel()
-        val context= LocalContext.current
+        val context = LocalContext.current
         val navController = rememberNavController()
         val sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = false, // disables half height
             confirmValueChange = { true }
         )
         var showSheet by remember { mutableStateOf(false) }
+        val hideScaffold = remember { mutableStateOf(true) }
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = "Simple Scaffold",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
+                if (hideScaffold.value){
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(
+                                text = "Simple Scaffold",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        }
-                        IconButton(onClick = { }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More")
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = ActionBarColor,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu"
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                            IconButton(onClick = { }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "More")
+                            }
+                        },
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+
                     )
-                )
+                }
+
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { showSheet = true }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
+                if (hideScaffold.value){
+                    FloatingActionButton(onClick = { showSheet = true }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add")
+                    }
                 }
+
             },
             bottomBar = {
-                BottomBar(navController)
+                if (hideScaffold.value){
+                    BottomBar(navController)
+                }
+
             }
         ) { padding ->
             Box(
@@ -100,7 +123,7 @@ class MainActivity : ComponentActivity() {
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                NavigationGraph(navController)
+                NavigationGraph(navController=navController,hideScaffold = hideScaffold)
             }
         }
         if (showSheet) {
@@ -108,7 +131,7 @@ class MainActivity : ComponentActivity() {
                 onDismissRequest = { showSheet = false },
                 sheetState = sheetState
             ) {
-                BottomSheetContent(addTopicViewmodel,context)
+                BottomSheetContent(addTopicViewmodel, context)
             }
         }
     }
@@ -149,19 +172,25 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun NavigationGraph(navController: NavHostController) {
-        NavHost(navController, startDestination = "home") {
+    fun NavigationGraph(navController: NavHostController,hideScaffold:MutableState<Boolean>) {
+        NavHost(navController = navController, startDestination = "home") {
             composable("home") {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp)
                 ) {
-                    ShowAllDayTopics(userId = "123")
+                    hideScaffold.value=true
+                    ShowAllDayTopics(navController = navController, userId = "123")
+
                 }
             }
             composable("profile") { Text("Profile Screen") }
             composable("settings") { Text("Settings Screen") }
+            composable("showTopics") {
+                hideScaffold.value=false
+                ShowAllTopicScreen(navController)
+            }
         }
     }
 
