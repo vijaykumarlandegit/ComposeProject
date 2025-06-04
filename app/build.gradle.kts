@@ -70,7 +70,8 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.lifecycle.viewmodel.compose)
-
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.google.signin)
 
 
 }

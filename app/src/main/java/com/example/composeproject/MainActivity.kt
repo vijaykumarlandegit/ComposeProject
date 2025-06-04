@@ -22,11 +22,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.composeproject.presentation.compose.BottomSheetContent
 import com.example.composeproject.presentation.compose.ShowAllDayTopics
+import com.example.composeproject.presentation.screen.MainAuthScreen
 import com.example.composeproject.presentation.screen.ShowAllTopicScreen
 import com.example.composeproject.presentation.screen.SplashScreen
 import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
  import com.example.composeproject.ui.theme.ComposeProjectTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -36,30 +38,44 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
+        FirebaseApp.initializeApp(this)
+
         setContent {
             var showSplash by remember { mutableStateOf(true) }
+            var isUserSignedIn by remember { mutableStateOf(false) }
+            val navController = rememberNavController()
 
 
             ComposeProjectTheme {
-                if (showSplash) {
-                    SplashScreen {
-                        showSplash = false
+                when {
+                    showSplash -> {
+                        SplashScreen { isSignedIn ->
+                            isUserSignedIn = isSignedIn
+                            showSplash = false
+                        }
                     }
-                } else {
-                    SimpleScaffold()
-
+                    isUserSignedIn -> {
+                        SimpleScaffold(navController)
+                    }
+                    else -> {
+                        MainAuthScreen(
+                            navController = navController,
+                            onLoginSuccess = {
+                                isUserSignedIn = true // Show Scaffold after login
+                            }
+                        )
+                    }
                 }
-             }
+            }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun SimpleScaffold() {
+    fun SimpleScaffold(navController: NavHostController) {
         val addTopicViewmodel: AddTopicViewmodel = viewModel()
         val context = LocalContext.current
-        val navController = rememberNavController()
-        val sheetState = rememberModalBottomSheetState(
+         val sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = false, // disables half height
             confirmValueChange = { true }
         )
@@ -191,6 +207,8 @@ class MainActivity : ComponentActivity() {
                 hideScaffold.value=false
                 ShowAllTopicScreen(navController)
             }
+
+
         }
     }
 

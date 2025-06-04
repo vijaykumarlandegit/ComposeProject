@@ -13,16 +13,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.composeproject.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun SplashScreen(onTimeout: () -> Unit) {
+fun SplashScreen(onResult: (Boolean) -> Unit) {
     LaunchedEffect(true) {
         delay(2000)
-        onTimeout()
+        val isUserSignedIn = Firebase.auth.currentUser != null
+        onResult(isUserSignedIn)
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
