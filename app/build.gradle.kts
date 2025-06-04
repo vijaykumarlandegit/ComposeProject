@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.signin)
+    implementation(libs.compose.material.icons.extended)
 
 
 }

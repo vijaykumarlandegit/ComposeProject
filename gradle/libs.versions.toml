@@ -28,6 +28,7 @@ credentialsPlayServicesAuth = "1.5.0"
 google-identity = "1.1.1"
 firebase-bom = "33.14.0"
 google-auth = "21.3.0"
+compose = "1.7.8" # or your Compose version
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -57,6 +58,7 @@ androidx-credentials-play-services-auth = { group = "androidx.credentials", name
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "google-identity" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 google-signin = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-auth" }
+compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

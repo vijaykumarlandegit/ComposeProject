@@ -1,5 +1,6 @@
 package com.example.composeproject.presentation.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,6 +30,7 @@ import androidx.navigation.NavHostController
 import com.example.composeproject.data.model.TopicClass
 import com.example.composeproject.presentation.viewmodel.FetchTopicsViewModel
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -35,12 +38,22 @@ import java.util.Locale
 @Composable
 fun ShowAllTopicScreen(
     navController: NavHostController,
+    date:String,
     viewModel: FetchTopicsViewModel = hiltViewModel()
 ) {
+    // This triggers when userId changes → fetch all topics
+  //  val userId=FirebaseAuth.getInstance().currentUser?.uid
     LaunchedEffect(Unit) {
         viewModel.getTopicsListFromFireStore("123")
     }
-    val topicList = viewModel.topicList
+
+    // This triggers when either date or topicList updates → filter the list
+    LaunchedEffect(date, viewModel.topicList) {
+        viewModel.getTopicsByDate(date)
+    }
+    val topicList = viewModel.listByDate
+    val context= LocalContext.current
+  //  Toast.makeText(context,"${topicList.size}", Toast.LENGTH_LONG).show()
 
     Box(
         modifier = Modifier

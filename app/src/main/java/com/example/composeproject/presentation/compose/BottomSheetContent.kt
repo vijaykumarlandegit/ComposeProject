@@ -169,7 +169,7 @@ fun BottomSheetContent(addTopicViewmodel: AddTopicViewmodel, context: Context) {
 
     }
 }
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun BottomSheetContent() {
 

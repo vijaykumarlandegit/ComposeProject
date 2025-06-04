@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.composeproject.presentation.compose.BottomSheetContent
 import com.example.composeproject.presentation.compose.ShowAllDayTopics
+import com.example.composeproject.presentation.compose.dashCompose
 import com.example.composeproject.presentation.screen.MainAuthScreen
 import com.example.composeproject.presentation.screen.ShowAllTopicScreen
 import com.example.composeproject.presentation.screen.SplashScreen
@@ -87,7 +88,7 @@ class MainActivity : ComponentActivity() {
                     CenterAlignedTopAppBar(
                         title = {
                             Text(
-                                text = "Simple Scaffold",
+                                text = "Study Tracker",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
@@ -156,6 +157,7 @@ class MainActivity : ComponentActivity() {
     fun BottomBar(navController: NavController) {
         val items = listOf(
             BottomNavItem.Home,
+            BottomNavItem.Work,
             BottomNavItem.Profile,
             BottomNavItem.Settings
         )
@@ -183,14 +185,27 @@ class MainActivity : ComponentActivity() {
 
     sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: String) {
         object Home : BottomNavItem("Home", Icons.Default.Home, "home")
+        object Work : BottomNavItem("Work", Icons.Default.Book, "work")
         object Profile : BottomNavItem("Profile", Icons.Default.Person, "profile")
         object Settings : BottomNavItem("Settings", Icons.Default.Settings, "settings")
     }
 
     @Composable
     fun NavigationGraph(navController: NavHostController,hideScaffold:MutableState<Boolean>) {
+        val userId=FirebaseAuth.getInstance().currentUser?.uid
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    hideScaffold.value=true
+                    dashCompose(navController = navController, userId = userId)
+
+                }
+            }
+            composable("work") {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -203,9 +218,14 @@ class MainActivity : ComponentActivity() {
             }
             composable("profile") { Text("Profile Screen") }
             composable("settings") { Text("Settings Screen") }
-            composable("showTopics") {
+
+            composable("showTopics/{date}") { backStackEntry ->
                 hideScaffold.value=false
-                ShowAllTopicScreen(navController)
+
+                val date = backStackEntry.arguments?.getString("date")
+                if (date != null) {
+                    ShowAllTopicScreen(navController=navController,date = date)
+                }
             }
 
 

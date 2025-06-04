@@ -1,5 +1,6 @@
 package com.example.composeproject.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,6 +25,9 @@ class FetchTopicsViewModel @Inject constructor(
     var topicList by mutableStateOf<List<TopicClass>>(emptyList())
         private set
 
+    var listByDate by mutableStateOf<List<TopicClass>>(emptyList())
+        private set
+
     var groupedByDate by mutableStateOf<List<DateSummary>>(emptyList())
         private set
 
@@ -32,12 +36,19 @@ class FetchTopicsViewModel @Inject constructor(
             val newList = repo.getTopicsListFromFireStore(userId)
             topicList = newList
 
+            Log.d("list","$topicList")
+
             // Grouping by date and preparing summary
             val grouped = newList.groupBy { it.date }
                 .map { (date, topicsForDate) ->
-                    val totalMinutes = topicsForDate.sumOf {
-                        ((it.endTime?.seconds ?: 0) - (it.startTime?.seconds ?: 0)).toInt() / 60
-                    }
+                    val totalMinutes = topicsForDate.sumOf { topic ->
+                        val start = topic.startTime?.toDate()?.time ?: 0L  // in milliseconds
+                        val end = topic.endTime?.toDate()?.time ?: 0L      // in milliseconds
+
+                        val durationMillis = end - start
+                        val minutes = if (durationMillis > 0) durationMillis / (1000 * 60) else 0L
+                        minutes
+                    }.toInt()
                     DateSummary(
                         date = date,
                         totalTopics = topicsForDate.size,
@@ -48,4 +59,9 @@ class FetchTopicsViewModel @Inject constructor(
             groupedByDate = grouped
         }
     }
+
+    fun getTopicsByDate(date: String) {
+        listByDate= topicList.filter { it.date == date }
+    }
+
 }
