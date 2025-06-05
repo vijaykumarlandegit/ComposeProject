@@ -135,7 +135,7 @@ fun BottomSheetContent(addTopicViewmodel: AddTopicViewmodel, context: Context) {
                 onClick = {
                     if(topicName.isNotEmpty() && topicDes.isNotEmpty()) {
                         val topic = TopicClass(
-                            "",
+                            "current",
                             topicName,
                             topicDes,
                             Timestamp.now(),

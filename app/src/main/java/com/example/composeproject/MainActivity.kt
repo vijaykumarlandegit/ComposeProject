@@ -201,7 +201,7 @@ class MainActivity : ComponentActivity() {
                         .padding(8.dp)
                 ) {
                     hideScaffold.value=true
-                    dashCompose(navController = navController, userId = userId)
+                    dashCompose(navController = navController)
 
                 }
             }

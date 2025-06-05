@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.composeproject.R
+import com.example.composeproject.data.model.TopicClass
 import com.example.composeproject.data.model.User
 import com.example.composeproject.presentation.viewmodel.AddUserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -118,7 +119,8 @@ fun MainAuthScreen(
                         val userId=FirebaseAuth.getInstance().currentUser?.uid ?:""
                         val user = User(
                             uid = userId,
-                            isGuest = true
+                            isGuest = true,
+                            currentTopic = TopicClass(topicId="current")
                         )
                         viewModel.addUser(userId,user)
                         onLoginSuccess() // Call callback
