@@ -44,7 +44,7 @@ fun ShowAllTopicScreen(
     // This triggers when userId changes → fetch all topics
   //  val userId=FirebaseAuth.getInstance().currentUser?.uid
     LaunchedEffect(Unit) {
-        viewModel.getTopicsListFromFireStore("123")
+        viewModel.getTopicsListFromFireStore()
     }
 
     // This triggers when either date or topicList updates → filter the list

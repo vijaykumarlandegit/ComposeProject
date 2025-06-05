@@ -8,11 +8,17 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.Button
@@ -30,8 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,14 +74,13 @@ fun dashCompose(
     userViewModel:FetchUserViewModel= hiltViewModel(),
     addEndTimeViewModel:AddEndTimeViewModel= hiltViewModel(),
     viewModel: FetchTopicsViewModel = hiltViewModel(),
-    auth: FirebaseAuth
  ) {
-    val userId=auth.currentUser?.uid
+    val userId=FirebaseAuth.getInstance().currentUser?.uid
 
     LaunchedEffect(Unit) {
         userViewModel.fetchUser()
         if (userId != null) {
-            viewModel.getTopicsListFromFireStore(userId)
+            viewModel.getTopicsListFromFireStore()
         }
         viewModel.getTopicsByDate(SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()))
     }
@@ -92,7 +100,8 @@ fun dashCompose(
     var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
     var showTimePicker by remember { mutableStateOf(false) }
     val context=LocalContext.current
-
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
 
     val animatedFraction by animateFloatAsState(
         targetValue = targetFraction,
@@ -105,10 +114,12 @@ fun dashCompose(
         (1f - animatedFraction) to Color(0xFFBDBDBD)
     )
 
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
     ) {
         Card(
             modifier = Modifier
@@ -271,39 +282,65 @@ fun dashCompose(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "",
-                    onValueChange = {},
-                    label = { Text("Select End Time") },
-                    readOnly = true,
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showTimePicker = true },
-                    trailingIcon = {
-                        Icon(imageVector = Icons.Default.AccessTime, contentDescription = "Pick Time")
+                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                        .clickable { showTimePicker = true }
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "Select time",
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = "Select time"
+                        )
                     }
-                )
+                }
+//                OutlinedTextField(
+//                    value = selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "",
+//                    onValueChange = {},
+//                    label = { Text("Select End Time") },
+//                    readOnly = true,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .combinedClickable(
+//                            interactionSource = remember { MutableInteractionSource() },
+//                            indication = null,
+//                            onClick = {
+//                                showTimePicker = true
+//                            }
+//                        ),
+//                    trailingIcon = {
+//                        Icon(
+//                            imageVector = Icons.Default.AccessTime,
+//                            contentDescription = "Pick Time"
+//                        )
+//                    }
+//                )
+
+
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = {
-
                         val updatedTopic = currentTopic?.copy(
-                            endTime = selectedUTCTime // Only update this field
+                            endTime = selectedUTCTime
                         )
-
                         if (updatedTopic != null) {
                             addEndTimeViewModel.uploadEndTime(updatedTopic) { isSuccess ->
-                                if (isSuccess) {
-                                    Toast.makeText(context, "Updated Successfully!!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "Something is wrong", Toast.LENGTH_SHORT).show()
-                                }
+                                Toast.makeText(context, if (isSuccess) "Updated Successfully!!" else "Something is wrong", Toast.LENGTH_SHORT).show()
                             }
                         }
-
-
                     },
                     enabled = selectedTime != null,
                     modifier = Modifier.align(Alignment.End)
@@ -313,23 +350,22 @@ fun dashCompose(
             }
         }
 
-        if (showTimePicker) {
-            val context = LocalContext.current
-            val currentTime = LocalTime.now()
-
-            TimePickerDialog(
-                context,
-                { _, hour: Int, minute: Int ->
-                    selectedTime = LocalTime.of(hour, minute)
-                    val selectedDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(hour, minute))
-                    selectedUTCTime = Timestamp(Date.from(selectedDateTime.atZone(ZoneId.systemDefault()).toInstant()))
-
-                    showTimePicker = false
-                },
-                currentTime.hour,
-                currentTime.minute,
-                false
-            ).show()
+        LaunchedEffect(showTimePicker) {
+            if (showTimePicker) {
+                val currentTime = LocalTime.now()
+                TimePickerDialog(
+                    context,
+                    { _, hour: Int, minute: Int ->
+                        selectedTime = LocalTime.of(hour, minute)
+                        val selectedDateTime = LocalDateTime.of(LocalDate.now(), selectedTime)
+                        selectedUTCTime = Timestamp(Date.from(selectedDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+                        showTimePicker = false
+                    },
+                    currentTime.hour,
+                    currentTime.minute,
+                    false
+                ).show()
+            }
         }
     }
 }

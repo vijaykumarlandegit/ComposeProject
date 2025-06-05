@@ -31,9 +31,9 @@ class FetchTopicsViewModel @Inject constructor(
     var groupedByDate by mutableStateOf<List<DateSummary>>(emptyList())
         private set
 
-    fun getTopicsListFromFireStore(userId: String) {
+    fun getTopicsListFromFireStore() {
         viewModelScope.launch(Dispatchers.IO) {
-            val newList = repo.getTopicsListFromFireStore(userId)
+            val newList = repo.getTopicsListFromFireStore()
             topicList = newList
 
             Log.d("list","$topicList")

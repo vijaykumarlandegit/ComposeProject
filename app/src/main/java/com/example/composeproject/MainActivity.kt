@@ -1,8 +1,10 @@
 package com.example.composeproject
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -190,6 +192,7 @@ class MainActivity : ComponentActivity() {
         object Settings : BottomNavItem("Settings", Icons.Default.Settings, "settings")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun NavigationGraph(navController: NavHostController,hideScaffold:MutableState<Boolean>) {
         val userId=FirebaseAuth.getInstance().currentUser?.uid

@@ -63,7 +63,7 @@ fun MainAuthScreen(
                     val user = User(
                         uid = userId,
                         email = userEmail,
-                        isGuest = true
+                        isGuest = false
                     )
                     viewModel.addUser(userId, user)
                     onLoginSuccess() // Call callback

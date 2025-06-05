@@ -45,7 +45,7 @@ fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: 
 
     LaunchedEffect(Unit) {//id
         if (userId != null) {
-            viewModel.getTopicsListFromFireStore(userId)
+            viewModel.getTopicsListFromFireStore()
         }
     }
     val groupedByDate = viewModel.groupedByDate
