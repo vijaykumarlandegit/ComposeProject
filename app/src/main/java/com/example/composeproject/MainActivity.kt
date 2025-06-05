@@ -38,10 +38,13 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
         FirebaseApp.initializeApp(this)
+
+
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }
@@ -73,6 +76,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SimpleScaffold(navController: NavHostController) {
@@ -150,7 +154,7 @@ class MainActivity : ComponentActivity() {
                 onDismissRequest = { showSheet = false },
                 sheetState = sheetState
             ) {
-                BottomSheetContent(addTopicViewmodel, context)
+                BottomSheetContent(addTopicViewmodel,context)
             }
         }
     }

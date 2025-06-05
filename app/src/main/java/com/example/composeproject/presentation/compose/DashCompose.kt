@@ -263,92 +263,89 @@ fun dashCompose(
             }
         }
 
+        if(!currentTopic?.topicId.isNullOrEmpty()){
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Current Running Topic", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Current Running Topic", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(12.dp))
+                    Text("Title: ${currentTopic?.topicTitle}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Subject: ${currentTopic?.subject}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Description: ${currentTopic?.topicDescription}", style = MaterialTheme.typography.bodySmall)
+                    Text("Start Time: ${currentTopic?.startTime?.toDate()?.toString() ?: "Not Available"}", style = MaterialTheme.typography.bodySmall)
 
-                Text("Title: ${currentTopic?.topicTitle}", style = MaterialTheme.typography.bodyMedium)
-                Text("Subject: ${currentTopic?.subject}", style = MaterialTheme.typography.bodyMedium)
-                Text("Description: ${currentTopic?.topicDescription}", style = MaterialTheme.typography.bodySmall)
-                Text("Start Time: ${currentTopic?.startTime?.toDate()?.toString() ?: "Not Available"}", style = MaterialTheme.typography.bodySmall)
-
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-                        .clickable { showTimePicker = true }
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                            .clickable { showTimePicker = true }
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                        Text(
-                            text = selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "Select time",
-                            modifier = Modifier.weight(1f)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.AccessTime,
-                            contentDescription = "Select time"
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "Select time",
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                imageVector = Icons.Default.AccessTime,
+                                contentDescription = "Select time"
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            val updatedTopic = currentTopic?.copy(
+                                endTime = selectedUTCTime
+                            )
+                            if (updatedTopic != null) {
+                                addEndTimeViewModel.uploadEndTime(updatedTopic) { isSuccess ->
+                                    Toast.makeText(context, if (isSuccess) "Updated Successfully!!" else "Something is wrong", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        enabled = selectedTime != null,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text("Submit")
                     }
                 }
-//                OutlinedTextField(
-//                    value = selectedTime?.format(DateTimeFormatter.ofPattern("hh:mm a")) ?: "",
-//                    onValueChange = {},
-//                    label = { Text("Select End Time") },
-//                    readOnly = true,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .combinedClickable(
-//                            interactionSource = remember { MutableInteractionSource() },
-//                            indication = null,
-//                            onClick = {
-//                                showTimePicker = true
-//                            }
-//                        ),
-//                    trailingIcon = {
-//                        Icon(
-//                            imageVector = Icons.Default.AccessTime,
-//                            contentDescription = "Pick Time"
-//                        )
-//                    }
-//                )
+            }
+        }else if(currentTopic?.topicId.isNullOrEmpty()){
 
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Add New Topic", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
 
+                    Text(" You can add new topic by clicking on button", style = MaterialTheme.typography.bodyMedium)
 
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = {
-                        val updatedTopic = currentTopic?.copy(
-                            endTime = selectedUTCTime
-                        )
-                        if (updatedTopic != null) {
-                            addEndTimeViewModel.uploadEndTime(updatedTopic) { isSuccess ->
-                                Toast.makeText(context, if (isSuccess) "Updated Successfully!!" else "Something is wrong", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    },
-                    enabled = selectedTime != null,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("Submit")
                 }
             }
         }
+
+
+
 
         LaunchedEffect(showTimePicker) {
             if (showTimePicker) {
