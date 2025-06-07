@@ -39,7 +39,8 @@ class FetchTopicsViewModel @Inject constructor(
             Log.d("list","$topicList")
 
             // Grouping by date and preparing summary
-            val grouped = newList.groupBy { it.date }
+            val grouped = newList
+                .groupBy { it.date }
                 .map { (date, topicsForDate) ->
                     val totalMinutes = topicsForDate.sumOf { topic ->
                         val start = topic.startTime?.toDate()?.time ?: 0L  // in milliseconds

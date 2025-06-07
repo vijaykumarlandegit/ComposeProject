@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -65,6 +66,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -82,29 +84,29 @@ fun dashCompose(
         if (userId != null) {
             viewModel.getTopicsListFromFireStore()
         }
-        viewModel.getTopicsByDate(SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()))
+       // viewModel.getTopicsByDate(SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()))
     }
-
-
+    val todayDate=SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
     val groupedByDate = viewModel.groupedByDate
-    val topic=viewModel.topicList
+    val todayInfo=groupedByDate.find { it.date==todayDate}
+
+    val topic=viewModel.groupedByDate
 
     var user= userViewModel.user
     var currentTopic=user?.currentTopic
-      val totalStudyMinutesToday = groupedByDate.sumOf { it.totalTopics }
-    val todayTopicsCount = groupedByDate.sumOf { it.totalMinutes }
+    val totalStudyMinutesToday = todayInfo?.totalMinutes?:0
+    val todayTopicsCount =  todayInfo?.totalTopics?:0
 
     val totalDayMinutes = 24 * 60f
-    val targetFraction = totalStudyMinutesToday / totalDayMinutes
+    val targetFraction = totalStudyMinutesToday.div(totalDayMinutes)
     var selectedUTCTime by remember { mutableStateOf<Timestamp?>(null) }
     var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
     var showTimePicker by remember { mutableStateOf(false) }
     val context=LocalContext.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val focusRequester = remember { FocusRequester() }
+
 
     val animatedFraction by animateFloatAsState(
-        targetValue = targetFraction,
+        targetValue = targetFraction?:0f,
         animationSpec = tween(durationMillis = 1000),
         label = "AnimatedStudyFraction"
     )
@@ -121,148 +123,6 @@ fun dashCompose(
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                // Pie Chart on the left
-                Box(
-                    modifier = Modifier
-                        .size(150.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        var startAngle = -90f
-                        pieData.forEach { (fraction, color) ->
-                            val sweepAngle = 360f * fraction
-                            drawArc(
-                                color = color,
-                                startAngle = startAngle,
-                                sweepAngle = sweepAngle,
-                                useCenter = true
-                            )
-                            startAngle += sweepAngle
-                        }
-                    }
-
-                    Text(
-                        text = "${(animatedFraction * 100).toInt()}%",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-
-                // Info on the right
-                Column(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                ) {
-                    Text(
-                        text = "Today's Topics: $todayTopicsCount",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Studied: ${totalStudyMinutesToday / 60}h ${totalStudyMinutesToday % 60}m",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            val maxMinutes = 1440f // total minutes in 24 hours
-
-            val colorForMinutes: (Int) -> Color = { minutes ->
-                when {
-                    minutes >= 960 -> Color(0xFF2E7D32) // Dark Green
-                    minutes >= 601 -> Color(0xFF4CAF50) // Green
-                    minutes >= 361 -> Color(0xFFFFC107) // Yellow
-                    minutes >= 181 -> Color(0xFFFF9800) // Orange
-                    else -> Color(0xFFF44336) // Red
-                }
-            }
-
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                reverseLayout = true // Reverse scroll direction
-            ) {
-                items(topic.reversed()) { topicItem ->
-                    val date = topicItem.date
-                    val minutes = if (topicItem.startTime != null && topicItem.endTime != null) {
-                        ((topicItem.endTime.seconds - topicItem.startTime.seconds) / 60).toInt()
-                    } else 0
-
-                    val hours = minutes / 60
-                    val remainingMinutes = minutes % 60
-                    val formattedTime = when {
-                        hours > 0 && remainingMinutes > 0 -> "${hours} hr ${remainingMinutes} min"
-                        hours > 0 -> "${hours} hr"
-                        else -> "${remainingMinutes} min"
-                    }
-
-                    val barHeightRatio = minutes / maxMinutes.toFloat()
-                    val color = colorForMinutes(minutes)
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.height(200.dp)
-                    ) {
-                        Text(
-                            text = formattedTime,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .width(40.dp) // wider bar for longer text
-                                .background(
-                                    Color.LightGray.copy(alpha = 0.3f),
-                                    shape = RoundedCornerShape(6.dp)
-                                ),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(fraction = barHeightRatio)
-                                    .background(color = color, shape = RoundedCornerShape(6.dp))
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = date,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-        }
-
         if(!currentTopic?.topicId.isNullOrEmpty()){
             Card(
                 modifier = Modifier
@@ -271,15 +131,36 @@ fun dashCompose(
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(16.dp,),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)) {
+
+                    val formatter = SimpleDateFormat("dd-MM-yyyy  hh:mm a", Locale.getDefault())
+                    formatter.timeZone = TimeZone.getDefault() // Local time zone, e.g., IST
+
                     Text("Current Running Topic", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text("Title: ${currentTopic?.topicTitle}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Subject: ${currentTopic?.subject}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Description: ${currentTopic?.topicDescription}", style = MaterialTheme.typography.bodySmall)
-                    Text("Start Time: ${currentTopic?.startTime?.toDate()?.toString() ?: "Not Available"}", style = MaterialTheme.typography.bodySmall)
+                    Text("${currentTopic?.topicTitle}", style = MaterialTheme.typography.bodyMedium)
 
+                    currentTopic?.subject?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            modifier = Modifier
+                                .background(Color(0xFF3F51B5), shape = RoundedCornerShape(4.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+
+
+                     Text("${currentTopic?.topicDescription}", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "Start Time: ${
+                            currentTopic?.startTime?.toDate()?.let { formatter.format(it) } ?: "Not Available"
+                        }",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
 
 
@@ -335,7 +216,9 @@ fun dashCompose(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Add New Topic", style = MaterialTheme.typography.titleMedium)
+                    Text("Add New Topic",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(" You can add new topic by clicking on button", style = MaterialTheme.typography.bodyMedium)
@@ -343,6 +226,160 @@ fun dashCompose(
                 }
             }
         }
+         Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                // Pie Chart on the left
+                Box(
+                    modifier = Modifier
+                        .size(150.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        var startAngle = -90f
+                        pieData.forEach { (fraction, color) ->
+                            val sweepAngle = 360f * fraction
+                            drawArc(
+                                color = color,
+                                startAngle = startAngle,
+                                sweepAngle = sweepAngle,
+                                useCenter = true
+                            )
+                            startAngle += sweepAngle
+                        }
+                    }
+
+                    Text(
+                        text = "${(animatedFraction * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+
+                // Info on the right
+                Column(
+                    modifier = Modifier
+                        .padding(start = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = todayDate,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Today's Topics : $todayTopicsCount",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = " ${totalStudyMinutesToday / 60}h ${totalStudyMinutesToday % 60}m",
+                        style = MaterialTheme.typography.headlineLarge
+                    )
+                }
+            }
+        }
+        if (topic.isNotEmpty()){
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(8.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                val maxMinutes = 1440f // total minutes in 24 hours
+
+                val colorForMinutes: (Int) -> Color = { minutes ->
+                    when {
+                        minutes >= 960 -> Color(0xFF2E7D32) // Dark Green
+                        minutes >= 601 -> Color(0xFF4CAF50) // Green
+                        minutes >= 361 -> Color(0xFFFFC107) // Yellow
+                        minutes >= 181 -> Color(0xFFFF9800) // Orange
+                        else -> Color(0xFFF44336) // Red
+                    }
+                }
+
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    reverseLayout = true // Reverse scroll direction
+                ) {
+
+                    items(topic.sortedBy { it.date }.reversed()) { topicItem ->
+                        val inputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                        val outputFormat = SimpleDateFormat("dd-MM-yy", Locale.getDefault())
+                        val date1 = inputFormat.parse(topicItem.date)
+                        val date = outputFormat.format(date1!!)
+                        val minutes = topicItem.totalMinutes
+
+                        val hours = minutes / 60
+                        val remainingMinutes = minutes % 60
+                        val formattedTime = when {
+                            hours > 0 && remainingMinutes > 0 -> "${hours}h ${remainingMinutes}m"
+                            hours > 0 -> "${hours} hr"
+                            else -> "${remainingMinutes} min"
+                        }
+
+                        val barHeightRatio = minutes / maxMinutes.toFloat()
+                        val color = colorForMinutes(minutes)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.height(200.dp)
+                        ) {
+                            Text(
+                                text = formattedTime,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .width(40.dp) // wider bar for longer text
+                                    .background(
+                                        Color.LightGray.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(6.dp)
+                                    ),
+                                contentAlignment = Alignment.BottomCenter
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(fraction = barHeightRatio)
+                                        .background(color = color, shape = RoundedCornerShape(6.dp))
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Text(
+                                text = date,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
+
 
 
 
