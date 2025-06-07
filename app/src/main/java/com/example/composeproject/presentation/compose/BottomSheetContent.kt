@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composeproject.data.model.TopicClass
 import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
 import com.google.firebase.Timestamp
@@ -39,11 +40,12 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetContent(addTopicViewmodel: AddTopicViewmodel, context: Context) {
+fun BottomSheetContent(addTopicViewmodel: AddTopicViewmodel= hiltViewModel()) {
     var subjectName by remember { mutableStateOf("") }
     var topicName by remember { mutableStateOf("") }
     var topicDes by remember { mutableStateOf("") }
 
+    val context= LocalContext.current
 
 
 
@@ -179,130 +181,4 @@ fun BottomSheetContent(addTopicViewmodel: AddTopicViewmodel, context: Context) {
     }
 }
 
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun BottomSheetContent() {
 
-    val currentDateTime = remember {
-        SimpleDateFormat("yyyy-MM-dd | hh:mm a", Locale.getDefault()).format(Date())
-    }
-    var subjectName by remember { mutableStateOf("") }
-    var topicName by remember { mutableStateOf("") }
-    var topicDes by remember { mutableStateOf("") }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Add Study Details",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Add Study Topic and Select Time When You Start And End.",
-            fontSize = 15.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-
-        )
-
-
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            // Topic Name Field
-            OutlinedTextField(
-                value = subjectName,
-                onValueChange = { subjectName = it },
-                label = { Text("Subject Name") },
-                placeholder = { Text("Enter subject name") },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                )
-            )
-             OutlinedTextField(
-                value = topicName,
-                onValueChange = { topicName = it },
-                label = { Text("Topic Name") },
-                placeholder = { Text("Enter topic title") },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                )
-            )
-
-            // Topic Description Field
-            OutlinedTextField(
-                value = topicDes,
-                onValueChange = { topicDes = it },
-                label = { Text("Topic Description") },
-                placeholder = { Text("Write something about the topic...") },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                ),
-                maxLines = 6
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-            Box(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .border(
-                        width = 1.dp,
-                        color = Color.Gray,
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .padding(12.dp) // inner padding inside the border
-            ) {
-                Text(text = SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault()).format(Date()))
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Button(
-                onClick = {
-
-                }
-                ,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Upload")
-            }
-
-        }
-
-
-    }
-}

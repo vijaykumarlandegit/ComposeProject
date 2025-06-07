@@ -22,7 +22,6 @@ import androidx.navigation.NavController
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.composeproject.presentation.compose.BottomSheetContent
 import com.example.composeproject.presentation.compose.ShowAllDayTopics
 import com.example.composeproject.presentation.compose.dashCompose
 import com.example.composeproject.presentation.screen.MainAuthScreen
@@ -80,13 +79,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SimpleScaffold(navController: NavHostController) {
-        val addTopicViewmodel: AddTopicViewmodel = viewModel()
-        val context = LocalContext.current
-         val sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = false, // disables half height
-            confirmValueChange = { true }
-        )
-        var showSheet by remember { mutableStateOf(false) }
+         val context = LocalContext.current
+
         val hideScaffold = remember { mutableStateOf(true) }
         Scaffold(
             topBar = {
@@ -126,14 +120,7 @@ class MainActivity : ComponentActivity() {
                 }
 
             },
-            floatingActionButton = {
-                if (hideScaffold.value){
-                    FloatingActionButton(onClick = { showSheet = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
-                    }
-                }
 
-            },
             bottomBar = {
                 if (hideScaffold.value){
                     BottomBar(navController)
@@ -149,14 +136,7 @@ class MainActivity : ComponentActivity() {
                 NavigationGraph(navController=navController,hideScaffold = hideScaffold)
             }
         }
-        if (showSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showSheet = false },
-                sheetState = sheetState
-            ) {
-                BottomSheetContent(addTopicViewmodel,context)
-            }
-        }
+
     }
 
     @Composable

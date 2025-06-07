@@ -48,7 +48,7 @@ fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: 
             viewModel.getTopicsListFromFireStore()
         }
     }
-    val groupedByDate = viewModel.groupedByDate
+     val groupedByDate = viewModel.groupedByDate
     // val totalTopics=topicsList.size
     LazyColumn(
         modifier = Modifier
@@ -109,6 +109,9 @@ fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: 
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
+                        val totalTime=topic.totalMinutes
+                        val hours=totalTime/60
+                        val minute=totalTime%60
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -118,7 +121,7 @@ fun ShowAllDayTopics(viewModel: FetchTopicsViewModel = hiltViewModel(), userId: 
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Time: ${topic.totalMinutes} min",
+                                text = "Time: ${hours}hr ${minute}min",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
