@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -17,18 +18,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+
+import com.example.composeproject.data.alarm.scheduleReminders
 import com.example.composeproject.presentation.compose.ShowAllDayTopics
 import com.example.composeproject.presentation.compose.dashCompose
 import com.example.composeproject.presentation.screen.MainAuthScreen
 import com.example.composeproject.presentation.screen.ShowAllTopicScreen
 import com.example.composeproject.presentation.screen.SplashScreen
-import com.example.composeproject.presentation.viewmodel.AddTopicViewmodel
- import com.example.composeproject.ui.theme.ComposeProjectTheme
+import com.example.composeproject.presentation.viewmodel.ReminderViewModel
+import com.example.composeproject.ui.theme.ComposeProjectTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -37,11 +40,13 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
         FirebaseApp.initializeApp(this)
+
 
 
 
@@ -78,9 +83,15 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun SimpleScaffold(navController: NavHostController) {
+    fun SimpleScaffold(navController: NavHostController, reminderViewModel: ReminderViewModel= hiltViewModel()) {
          val context = LocalContext.current
+        val reminders = reminderViewModel.reminderList
 
+        LaunchedEffect(reminders) {
+            if (reminders.isNotEmpty()) {
+                scheduleReminders( this@MainActivity,reminders)
+            }
+        }
         val hideScaffold = remember { mutableStateOf(true) }
         Scaffold(
             topBar = {

@@ -1,6 +1,7 @@
 package com.example.composeproject.data.repository
 
 import com.example.composeproject.data.model.ReminderClass
+import com.example.composeproject.data.model.TopicClass
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -22,6 +23,20 @@ class ReminderRepo @Inject constructor(private val fireStore:FirebaseFirestore,p
             true
         }catch (e:Exception){
             false
+        }
+    }
+
+     suspend fun getReminderList(): List<ReminderClass> {
+        val uid = userId ?: return emptyList() // Return early if null
+        return try {
+            val snapshot = fireStore.collection("users")
+                .document(uid)
+                .collection("reminder")
+                .get()
+                .await()
+            snapshot.toObjects(ReminderClass::class.java)
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }
