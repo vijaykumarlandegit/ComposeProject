@@ -19,9 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import android.Manifest.permission.POST_NOTIFICATIONS
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
@@ -43,6 +45,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import android.Manifest
 
 
 @AndroidEntryPoint
@@ -103,7 +106,13 @@ class MainActivity : ComponentActivity() {
 
         val reminder = DailyReminderViewModel()
         reminder.scheduleDailyReminder(this)
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                101
+            )
+        }
         Scaffold(
             topBar = {
                 if (hideScaffold.value){

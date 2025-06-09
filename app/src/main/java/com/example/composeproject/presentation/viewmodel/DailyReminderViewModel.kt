@@ -5,6 +5,7 @@ import android.icu.util.TimeUnit
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.composeproject.task.ReminderWorker
@@ -21,27 +22,32 @@ class DailyReminderViewModel {
     @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleDailyReminder(context: Context) {
         val delayMillis = calculateDelayTill8PM()
-
-        val request = PeriodicWorkRequestBuilder<ReminderWorker>(
-            repeatInterval = Duration.ofDays(1),
-            flexTimeInterval = Duration.ofMinutes(15)
-        )
-            .setInitialDelay(Duration.ofMinutes(1))
-            .setInitialDelay(Duration.ofMillis(delayMillis))
+        val request = OneTimeWorkRequestBuilder<ReminderWorker>()
+            .setInitialDelay(Duration.ofSeconds(10))
             .build()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "StudyReminder",
-            ExistingPeriodicWorkPolicy.KEEP,
-            request
-        )
+        WorkManager.getInstance(context).enqueue(request)
+
+//        val request = PeriodicWorkRequestBuilder<ReminderWorker>(
+//            repeatInterval = Duration.ofDays(1),
+//            flexTimeInterval = Duration.ofMinutes(15)
+//        )
+//            .setInitialDelay(Duration.ofMinutes(1))
+//            .setInitialDelay(Duration.ofMillis(delayMillis))
+//            .build()
+//
+//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+//            "StudyReminder",
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            request
+//        )
     }
 
     private fun calculateDelayTill8PM(): Long {
         val now = Calendar.getInstance()
         val due = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 15)
-            set(Calendar.MINUTE, 45)
+            set(Calendar.HOUR_OF_DAY, 16)
+            set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
