@@ -1,5 +1,7 @@
 package com.example.composeproject
 
+import android.content.Context
+import android.icu.util.TimeUnit
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,6 +25,9 @@ import androidx.navigation.NavController
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 
 import com.example.composeproject.data.alarm.scheduleReminders
 import com.example.composeproject.presentation.compose.ShowAllDayTopics
@@ -30,7 +35,9 @@ import com.example.composeproject.presentation.compose.dashCompose
 import com.example.composeproject.presentation.screen.MainAuthScreen
 import com.example.composeproject.presentation.screen.ShowAllTopicScreen
 import com.example.composeproject.presentation.screen.SplashScreen
+import com.example.composeproject.presentation.viewmodel.DailyReminderViewModel
 import com.example.composeproject.presentation.viewmodel.ReminderViewModel
+import com.example.composeproject.task.ReminderWorker
 import com.example.composeproject.ui.theme.ComposeProjectTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.FirebaseApp
@@ -93,6 +100,10 @@ class MainActivity : ComponentActivity() {
             }
         }
         val hideScaffold = remember { mutableStateOf(true) }
+
+        val reminder = DailyReminderViewModel()
+        reminder.scheduleDailyReminder(this)
+
         Scaffold(
             topBar = {
                 if (hideScaffold.value){

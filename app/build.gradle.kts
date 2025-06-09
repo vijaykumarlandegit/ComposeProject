@@ -77,6 +77,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.signin)
     implementation(libs.compose.material.icons.extended)
+    implementation(libs.work.runtime)
+
+
 
 
 }
