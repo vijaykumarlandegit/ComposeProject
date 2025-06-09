@@ -17,16 +17,18 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class ReminderViewModel @Inject constructor(private val repo:ReminderRepo):ViewModel(){
+class ReminderViewModel @Inject constructor(private val repo: ReminderRepo) : ViewModel() {
 
-    fun setReminder(data:ReminderClass, isSet: (Boolean)->Unit){
-        viewModelScope.launch(Dispatchers.IO) {
-            repo.setReminder(data)
-            withContext(Dispatchers.Main){
-                isSet(true)
+    fun setReminder(data: ReminderClass, isSet: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+
+                repo.setReminder(data)
             }
+            isSet(true)
         }
     }
+
 
     var reminderList by mutableStateOf<List<ReminderClass>>(emptyList())
         private set  // ✅ Prevent external modification
