@@ -22,31 +22,25 @@ class DailyReminderViewModel {
     @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleDailyReminder(context: Context) {
         val delayMillis = calculateDelayTill8PM()
-        val request = OneTimeWorkRequestBuilder<ReminderWorker>()
-            .setInitialDelay(Duration.ofSeconds(10))
+
+        val request = PeriodicWorkRequestBuilder<ReminderWorker>(
+            repeatInterval = Duration.ofDays(1),
+            flexTimeInterval = Duration.ofMinutes(15) // Flex window for optimization
+        )
+            .setInitialDelay(Duration.ofMillis(delayMillis))
             .build()
 
-        WorkManager.getInstance(context).enqueue(request)
-
-//        val request = PeriodicWorkRequestBuilder<ReminderWorker>(
-//            repeatInterval = Duration.ofDays(1),
-//            flexTimeInterval = Duration.ofMinutes(15)
-//        )
-//            .setInitialDelay(Duration.ofMinutes(1))
-//            .setInitialDelay(Duration.ofMillis(delayMillis))
-//            .build()
-//
-//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-//            "StudyReminder",
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            request
-//        )
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "DailyStudyReminder",
+            ExistingPeriodicWorkPolicy.KEEP, // Prevents duplicate scheduling
+            request
+        )
     }
 
     private fun calculateDelayTill8PM(): Long {
         val now = Calendar.getInstance()
         val due = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 16)
+            set(Calendar.HOUR_OF_DAY, 20) // 20 = 8 PM
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
@@ -56,5 +50,4 @@ class DailyReminderViewModel {
         }
         return due.timeInMillis - now.timeInMillis
     }
-
 }
