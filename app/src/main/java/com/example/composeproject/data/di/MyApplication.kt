@@ -23,3 +23,6 @@ class MyApplication : Application(), Configuration.Provider {
             .setWorkerFactory(workerFactory)
             .build()
 }
+
+//As of recent WorkManager versions (especially 2.9.0+), Configuration.Provider requires the property
+// workManagerConfiguration instead of the method getWorkManagerConfiguration().

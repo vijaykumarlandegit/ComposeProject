@@ -48,13 +48,17 @@ import dagger.hilt.android.AndroidEntryPoint
 import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.example.composeproject.task.NetworkMonitor
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val CAMERA_REQUEST_CODE = 100
     private val LOCATION_REQUEST_CODE = 101
+    private lateinit var networkMonitor: NetworkMonitor
+
     @RequiresApi(Build.VERSION_CODES.O)
 
     private fun checkCameraPermission() {
@@ -311,6 +315,19 @@ class MainActivity : ComponentActivity() {
                 darkIcons = useDarkIcons
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        networkMonitor = NetworkMonitor(this) { isConnected ->
+            Toast.makeText(this, "Internet: $isConnected", Toast.LENGTH_SHORT).show()
+        }
+        networkMonitor.register()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        networkMonitor.unregister()
     }
 }
 
